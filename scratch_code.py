@@ -3,6 +3,18 @@
 # Scratch --- spare code -- removed code 
 
 
+# Output HTML Table 
+
+# Format to two decimal places
+
+pd.options.display.float_format = '{:.2f}'.format
+
+plyr_html_table = player_report.to_html()
+
+
+
+
+
 # ------------------------------------------------------------------------------
 
 

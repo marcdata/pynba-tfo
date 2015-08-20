@@ -41,9 +41,12 @@ bigdf = pickle.load(open(outfilename, 'rb'))
 fn_team_table = 'team_report_table.pik'
 fn_player_table = 'player_report_table.pik'
 
-team_report = pickle.load(open(fn_team_table, 'rb'))
-player_report = pickle.load(open(fn_player_table, 'rb'))
+# Issue with pickle compatibility? // Reading in using alt method, below. 
+# team_report = pickle.load(open(fn_team_table, 'rb'))
+# player_report = pickle.load(open(fn_player_table, 'rb'))
 
+team_report = pd.read_pickle(fn_team_table)
+player_report = pd.read_pickle(fn_player_table)
 
 # -----------------------------------------------------------------------------
 
@@ -168,6 +171,7 @@ fig.savefig('out_figures/figure12_HOU.jpg')
 
 # -------------------------------------------------
 
+# Figure 15
 
 # Team shotrate, efg, efg_diff comparisons. 
 

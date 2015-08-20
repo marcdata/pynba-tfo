@@ -20,21 +20,23 @@ import pickle
 
 # ------------------------------------------------------------------------
 
-filepath = r'c://Users/Marc/Documents/nbadata/Hou_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/PHI_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/LAC_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/MIA_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/ATL_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/GSW_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/MEM_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/SAS_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/CLE_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/nbadata/LAL_pbp_fga_x1.csv'
-filepath = r'c://Users/Marc/Documents/nbadata/NYK_pbp_fga_x1.csv'
-filepath = r'c://Users/Marc/Documents/nbadata/CHI_pbp_fga_x1.csv'
+# New folder: pynba-tfo
+
+filepath = r'c://Users/Marc/Documents/pynba-tfo/Hou_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/PHI_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/LAC_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/MIA_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/ATL_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/GSW_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/MEM_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/SAS_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/CLE_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/pynba-tfo/LAL_pbp_fga_x1.csv'
+filepath = r'c://Users/Marc/Documents/pynba-tfo/NYK_pbp_fga_x1.csv'
+filepath = r'c://Users/Marc/Documents/pynba-tfo/CHI_pbp_fga_x1.csv'
 
 # filename handling, for running on multiple teams at once
-filepre = "c://Users/Marc/Documents/nbadata/"
+filepre = "c://Users/Marc/Documents/pynba-tfo/"
 filepost = "_pbp_fga_x1.csv"
 teamnames = ['HOU', 'PHI', 'LAC', 'MIA', 'ATL', 'GSW', 'MEM', 'SAS', 'CLE', 'LAL', 'NYK', 'CHI']
 

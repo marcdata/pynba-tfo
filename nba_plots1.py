@@ -11,7 +11,7 @@ from urllib import urlopen
 # page = urlopen("http://econpy.pythonanywhere.com/ex/NFL_1979.csv")
 # page = urlopen("file:c:")
 
-filepath = r'c://Users/Marc/Documents/nbadata/teamstats1-hoopdata2.csv'
+filepath = r'c://Users/Marc/Documents/pynba-tfo/teamstats1-hoopdata2.csv'
 df = read_csv(filepath)
 
 df.plot(x='OffEff', y='DefEff', marker='.',  kind='scatter')

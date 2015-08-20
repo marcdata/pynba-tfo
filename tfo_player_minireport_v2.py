@@ -99,14 +99,6 @@ def tfo_player_report(plyr_name, df_shots):
     
     # print crosstab(plyrdf['distance'], plyrdf['epoch'])
     
-    
-    
-    
-    
-    
-    
-    
-    
     # Calc differences in shot rate 
     
     # fga counts. We're just getting a count here, so counting on "points" column, but could count on most any.
@@ -144,6 +136,7 @@ for p in shortlist:
         
 # throwing errors when players dont have enough 3 pt shot attempts, for some. Skipping for now. 
 #if p != 'L.Aldridge' and p != 'C.Kaman' and p != 'A.Horford' and p != 'H.Sims' and p != 'D.Waiters': < --- list of players w NaN's
+# Fixed: now using NaN's in try/catch type of statement.
 
 for p in activeshooters.index:
     plyrdf = tfo_player_report(p, bigdf)

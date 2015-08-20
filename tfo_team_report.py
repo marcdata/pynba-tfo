@@ -325,6 +325,7 @@ pearsonr(team_report['shotrate_diff'], team_report['prop_threes_diff'])
 # (0.48164911393624316, 0.0070403594139744228)
 # Higher TFO Shotrate -> Higher Proportion of 3s Attempted. 
 
+# **
 
 # Change in Proportion of 3s vs eFG conversion of 3 pt attempts
 
@@ -338,6 +339,19 @@ pearsonr(team_report['prop_threes_diff'], team_report['threeperc_diff'])
 
 
 # Change in eFG for three divisions of teams (tripiles) (aka 3-way quartiles). 
+
+# Based on prev two, check change in shotrate vs change in 3pt efg
+
+tfo_extra.plot_scatter_with_reg_overlay(team_report['shotrate_diff'], team_report['threeperc_diff'], figurenum = 1023, overlay = True)
+plt.xlabel('shotrate_diff')
+plt.ylabel('threeperc_diff')
+
+pearsonr(team_report['shotrate_diff'], team_report['threeperc_diff'])
+# ... 
+# Neglibile:
+# (-0.14635949429813827, 0.44026210425654566)
+
+
 
 
 
@@ -371,4 +385,120 @@ qa_e3_counts.value_counts()
 
 
 # ------------------------------------------------------------------------------
+
+# Some more, extra comparison
+
+# Filter not GSW
+filter_not_gsw = team_report.index != 'GSW'
+
+teams_not_gsw = team_report[filter_not_gsw]
+
+tfo_extra.plot_scatter_with_reg_overlay(teams_not_gsw['team_efg_e5'], teams_not_gsw['team_efg_e3'], figurenum = 1031, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('team_efg_e3')
+
+pearsonr(teams_not_gsw['team_efg_e5'], teams_not_gsw['team_efg_e3'])
+
+# so weakly neg correlated, if you take out GSW
+# Pearson r: -0.22670861463354905, 0.23695328299743237
+
+
+
+# -------------
+
+tfo_extra.plot_scatter_with_reg_overlay(team_report['team_efg_e5'], team_report['team_efg_e3'], figurenum = 1033, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('team_efg_e3')
+
+pearsonr(team_report['team_efg_e5'], team_report['team_efg_e3'])
+# Variances
+
+print "Variance in efg in e3: ", var(team_report['team_efg_e3'])
+
+print "Variance in efg in e5: ", var(team_report['team_efg_e5'])
+
+# Variance in efg in e3:  0.00287592554404
+# Variance in efg in e5:  0.000748020287562
+
+team_report['team_efg_e3'].describe()
+
+team_report['team_efg_e5'].describe()
+
+
+# Alt version, use season long espn AFG data
+
+tfo_extra.plot_scatter_with_reg_overlay(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index(), figurenum = 1034, overlay = True)
+plt.xlabel('AFG%')
+plt.ylabel('team_efg_diff')
+
+pearsonr(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index())
+
+# (-0.24814652224854314, 0.18610368990953505) 
+
+# Marginally neg regression.
+
+
+# Shot rate vs three pt percentage difference
+
+# filter out lowest two shotrate_diff's teams / no MIA, no GSW
+
+filter_shotratediff_only = (team_report.index != 'GSW') & (team_report.index != 'MIA')
+
+tfo_extra.plot_scatter_with_reg_overlay(team_report[filter_shotratediff_only]['shotrate_diff'].sort_index(), team_report[filter_shotratediff_only]['threeperc_diff'].sort_index(), figurenum = 1035, overlay = True)
+plt.xlabel('shotrate_diff')
+plt.ylabel('threeperc_diff')
+
+pearsonr(team_report[filter_shotratediff_only]['shotrate_diff'].sort_index(), team_report[filter_shotratediff_only]['threeperc_diff'].sort_index())
+
+#  (-0.41324150433709711, 0.028835574286124273)
+
+# So, the more teams go for TFO, the lower 3pt efficiency gets. 
+# Broadly, but it kind of looks like two diff populations, one strictly lower than 0,
+# one that's slightly above zero diff. 
+
+
+# 
+
+# Compare efg e5, vs e3, keep out GSW
+
+filter_no_gsw = (team_report.index != 'GSW') 
+
+tfo_extra.plot_scatter_with_reg_overlay(team_report[filter_no_gsw]['team_efg_e5'].sort_index(), team_report[filter_no_gsw]['team_efg_e3'].sort_index(), figurenum = 1036, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('team_efg_e3')
+
+pearsonr(team_report[filter_no_gsw]['team_efg_e5'].sort_index(), team_report[filter_no_gsw]['team_efg_e3'].sort_index())
+# (-0.22670861463354905, 0.23695328299743237)
+
+
+# ---------------------------------
+
+# Compare e3 minus mean(e5) as alternate comparison; instead of pairwise differences.
+
+filter_no_gsw = (team_report.index != 'GSW') 
+
+y = team_report[filter_no_gsw]['team_efg_e3'] - team_report[filter_no_gsw]['team_efg_e5'].mean()
+x = team_report[filter_no_gsw]['team_efg_e5']
+tfo_extra.plot_scatter_with_reg_overlay(x, y, figurenum = 1037, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('team_efg_e3 minus e5 mean')
+
+pearsonr(x, y)
+
+
+
+# Compare e5 to econtrol, simply, no differencing. 
+
+filter_no_gsw = (team_report.index != 'GSW') 
+
+y = team_efg_econtrol
+x = team_report['team_efg_e5']
+tfo_extra.plot_scatter_with_reg_overlay(x, y, figurenum = 1038, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('econtrol')
+
+pearsonr(x, y)
+
+
+# p < .10 (0.31637600575723901, 0.088512439422266012)
 
