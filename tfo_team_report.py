@@ -413,9 +413,9 @@ plt.ylabel('team_efg_e3')
 pearsonr(team_report['team_efg_e5'], team_report['team_efg_e3'])
 # Variances
 
-print "Variance in efg in e3: ", var(team_report['team_efg_e3'])
+print "Variance in efg in e3: ", np.var(team_report['team_efg_e3'])
 
-print "Variance in efg in e5: ", var(team_report['team_efg_e5'])
+print "Variance in efg in e5: ", np.var(team_report['team_efg_e5'])
 
 # Variance in efg in e3:  0.00287592554404
 # Variance in efg in e5:  0.000748020287562
@@ -427,11 +427,11 @@ team_report['team_efg_e5'].describe()
 
 # Alt version, use season long espn AFG data
 
-tfo_extra.plot_scatter_with_reg_overlay(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index(), figurenum = 1034, overlay = True)
-plt.xlabel('AFG%')
-plt.ylabel('team_efg_diff')
-
-pearsonr(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index())
+#tfo_extra.plot_scatter_with_reg_overlay(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index(), figurenum = 1034, overlay = True)
+#plt.xlabel('AFG%')
+#plt.ylabel('team_efg_diff')
+#
+#pearsonr(df_espn['AFG%'].sort_index(), team_report['team_efg_diff'].sort_index())
 
 # (-0.24814652224854314, 0.18610368990953505) 
 
@@ -501,4 +501,60 @@ pearsonr(x, y)
 
 
 # p < .10 (0.31637600575723901, 0.088512439422266012)
+
+
+# -- Commpare e5 to e4 efg
+
+# Compare e5 to epoch 4, simply, no differencing. 
+
+filter_epoch4 = bigdf['epoch'] == 4
+
+# calc per-team efg for the selected time period
+team_efg_e4 = bigdf[filter_epoch4].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch4].groupby('Tm')["points"].count()
+
+y = team_efg_e4
+x = team_report['team_efg_e5']
+tfo_extra.plot_scatter_with_reg_overlay(x, y, figurenum = 1039, overlay = True)
+plt.xlabel('team_efg_e5')
+plt.ylabel('efg_e4')
+
+pearsonr(x, y)
+
+# (0.40040225042760141, 0.028339003802023189)
+# so efg in e4 and e5 correlated. Makes sense. 
+
+# So upshot: normally, efg from differenct time periods *should* be correlated.
+# What's telling us something about e3 is that this relationship broke down.
+# That it is not correlated between the TFO window and normally, in epoch 5 (baseline). 
+# That's our interpretation. 
+
+
+
+# -------------------
+
+# Shotrate diff vs efg_e3
+
+
+# Shot rate vs three pt percentage difference
+
+# filter out lowest two shotrate_diff's teams / no MIA, no GSW
+
+# filter_shotratediff_only = (team_report.index != 'MIA')
+# filter_shotratediff_only = (team_report.index != 'MIA') & (team_report.index != 'POR')
+# prev filters for testing out... 
+
+# Leave in all teams.
+filter_shotratediff_only = (team_report.index != 'XXX')
+
+tfo_extra.plot_scatter_with_reg_overlay(team_report[filter_shotratediff_only]['shotrate_diff'].sort_index(), team_report[filter_shotratediff_only]['team_efg_diff'].sort_index(), figurenum = 1041, overlay = True)
+plt.xlabel('shotrate_diff')
+plt.ylabel('efg - diff')
+
+pearsonr(team_report[filter_shotratediff_only]['shotrate_diff'].sort_index(), team_report[filter_shotratediff_only]['team_efg_diff'].sort_index())
+
+# Out[21]: (-0.30600024812464699, 0.1000656721856395)
+# So shotrate_diff is marginally correlated with efg_diff. 
+
+
+
 

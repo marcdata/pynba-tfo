@@ -200,7 +200,7 @@ ax.set_ylim([30, 75])
 
 # Add legend. Make sure matches plotting order.
 
-ax.legend(['3 pt', '2 pt', '3s raw', '2s raw'], loc = 'lower right')
+ax.legend(['3s smoothed', '2s smoothed', '3s raw', '2s raw'], loc = 'lower right')
 
 # Title, label axes, etc
 ax.set_title('Shot Efficiency At End of Quarters, by Shot Type (2pt or 3pt)')
@@ -226,6 +226,68 @@ ax_counts.plot(nshots_threes.index, nshots_threes, 'r')
 ax_counts.plot(nshots_twos.index, nshots_twos, 'b')
 ax_counts.legend(['3 pt', '2 pt'])
 plt.show()
+
+# ----------------------------------------
+
+
+# Plot the eFG's by shottype, per minute. Add smoothing. 
+
+# Alternate version of Figure 208 -- with bar timeperiod highlight 
+# vs the red arrow 
+
+figure210 = plt.figure(210)
+figure210.clf()
+ax = figure210.add_subplot(111)
+
+seconds_index = nshots_twos.index
+
+# Could use the same index (x-axis, minute counts), but later cleanup. 
+
+# Plot smoothed versions, in color
+# Window size 9 or 11 probably the best overall balance between smoothing and 
+# teporal resolution. 
+
+window_size = 11
+
+ax.plot(seconds_index, 100 * movingaverage(efg_threes, window_size), 'r')
+ax.plot(seconds_index, 100 * movingaverage(efg_twos, window_size), 'b')
+# Add third, plot, smoother version of threes (better baseline comparison). Taken out for now. 
+# ax.plot(seconds_index, movingaverage(efg_threes, 21), 'b:')
+
+# Plot unsmoothed version, in grayscale
+ax.plot(nshots_threes.index, 100* efg_threes, ':', color = '0.7')
+ax.plot(nshots_twos.index, 100 * efg_twos, color = '0.8')
+
+# set lims. Note: xlims need to account for smoothing. Low-end of 
+# x-axis bitten off by box-smoothing, not accurate below x=windowsize/2.
+ax.set_xlim([window_size/2, 80])
+# ax.set_ylim([0.3, 0.75])
+ax.set_ylim([30, 75])
+
+# Add legend. Make sure matches plotting order.
+
+ax.legend(['3s smoothed', '2s smoothed', '3s raw', '2s raw'], loc = 'lower right')
+
+# Title, label axes, etc
+ax.set_title('Shot Efficiency At End of Quarters, by Shot Type (2pt or 3pt)')
+ax.set_xlabel('Seconds Remaining in Quarter')
+ax.set_ylabel('eFG %')
+
+# REM Add annotation (arrow), emphasizing drop in 3pt %
+
+# REM ax.annotate('Drop in 3pt efficiency', xy=(27, 60), xytext=(41, 70),
+# REM   arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+
+# Add annotation, emphasize drop, but highlight start, end times. T = 27, 40.
+# or two arrows? To start and end times?
+
+ax.annotate('Drop in 3pt efficiency', xy=(41, 60), xytext=(41, 70),
+    arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+ax.annotate('', xy=(27, 60), xytext=(27, 70),
+    arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+    
+plt.show()
+
 
 
 
