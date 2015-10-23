@@ -37,6 +37,7 @@ tfo_extra.plot_scatter_with_reg_overlay(x, y.values/2, figurenum = 1051, overlay
 
 pearsonr(x,y)
 
+
 # r, pval = (0.33536333291710885, 0.22172500228048758)
 # so... not that correlated with decreasing efficiency in time, during TFO window. 
 # time window 26-40

@@ -1,10 +1,18 @@
 # nba two-for-one shot analysis, version 2 / run multiple teams at once / do report
 
+# This one just loads in all the files from the csv's they came in. 
+# The main output is the bigdf dataframe (Pandas) which is then saved to a pickle file.
+
+# --------------------------
+
 # v4 -- do import only
 # run base stats separately
 
 # separate out per-team calculations
-# run - per-minute efg calcs
+# separate out per-second efg calcs
+# 
+# --------------------
+#
 
 # ------------------------------------------------------------------------
 
@@ -20,23 +28,21 @@ import pickle
 
 # ------------------------------------------------------------------------
 
-# New folder: pynba-tfo
-
-filepath = r'c://Users/Marc/Documents/pynba-tfo/Hou_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/PHI_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/LAC_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/MIA_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/ATL_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/GSW_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/MEM_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/SAS_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/CLE_pbp_fga_x1.csv'
-#filepath = r'c://Users/Marc/Documents/pynba-tfo/LAL_pbp_fga_x1.csv'
-filepath = r'c://Users/Marc/Documents/pynba-tfo/NYK_pbp_fga_x1.csv'
-filepath = r'c://Users/Marc/Documents/pynba-tfo/CHI_pbp_fga_x1.csv'
+filepath = r'c://Users/Marc/Documents/nbadata/Hou_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/PHI_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/LAC_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/MIA_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/ATL_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/GSW_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/MEM_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/SAS_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/CLE_pbp_fga_x1.csv'
+#filepath = r'c://Users/Marc/Documents/nbadata/LAL_pbp_fga_x1.csv'
+filepath = r'c://Users/Marc/Documents/nbadata/NYK_pbp_fga_x1.csv'
+filepath = r'c://Users/Marc/Documents/nbadata/CHI_pbp_fga_x1.csv'
 
 # filename handling, for running on multiple teams at once
-filepre = "c://Users/Marc/Documents/pynba-tfo/"
+filepre = "c://Users/Marc/Documents/nbadata/"
 filepost = "_pbp_fga_x1.csv"
 teamnames = ['HOU', 'PHI', 'LAC', 'MIA', 'ATL', 'GSW', 'MEM', 'SAS', 'CLE', 'LAL', 'NYK', 'CHI']
 
@@ -53,13 +59,16 @@ teamnames = ['ATL', 'BOS', 'BRK', 'CHO', 'CHI', 'CLE', 'DAL', 'DEN', 'DET', 'GSW
     
 # note: for some reason CHA named CHO in orig data
 
-for tn in teamnames:
-    print os.path.normpath(filepre + tn + filepost)
+def test_path():
+    for tn in teamnames:
+        print os.path.normpath(filepre + tn + filepost)
     
+#-------------------------------
 
-df = read_csv(filepath)
+# Test stub, read in csv file to dataframe df. 
+# df = read_csv(filepath)
 
-
+# ------------------------------
 
 #get sec assumes only minutes and seconds passed in / no hours
 def getSec(s):
@@ -67,6 +76,8 @@ def getSec(s):
     ie, '1:23:45' into something like 83 seconds. Returns numeric."""
     l = s.split(':')
     return float(int(l[0]) * 60 + float(l[1]))
+
+# Quick test of getSec
 
 print getSec('1:23:45')
 print getSec('0:04:15.2')
@@ -169,78 +180,84 @@ def epochTime_wide(t):
 
 # for all teams in set / do df and pbp (play by play) analysis 
 
-bigdf = pd.DataFrame()
+# Main function, load in all the data from the csv files.
 
-for tn in teamnames:
-    filepath = os.path.normpath(filepre + tn + filepost)
-    print "reading... ", filepath
-
-    df = read_csv(filepath)
-
-    # Do work , convert string timestamps to float values
+def main():
     
-    array_out = [getSec(temp) for temp in df.Time]
-    df['Time2'] = array_out
+    # Collect our final here in this bigdf dataframe.
+    bigdf = pd.DataFrame()
     
-    #df["Time2"].hist(bins=100)
+    for tn in teamnames:
+        filepath = os.path.normpath(filepre + tn + filepost)
+        print "reading... ", filepath
     
-    df2 = df[df["Time2"] < 180]
-    df2 = df2[df2["Qtr"] != "4th" ]
-    df2 = df2[df2["Qtr"] != "OT" ]
-    df2 = df2[df2["Qtr"] != "2OT"] 
-
-    #qtrs_check = unique(df2.Qtr)
-    #print qtrs_check
-
-    df2["MakeMiss"] = [parseMake(temp) for temp in df2.Description]
+        df = read_csv(filepath)
     
-    # pick which method to bin epochs with epochTime or epochTime_alt
-    df2["epoch"] = [epochTime(s) for s in df2.Time2]
-
-    shotTypeDists = [parseShotTypeDistancePlayer(s) for s in df2.Description]
-    fgatypes = [s[0] for s in shotTypeDists]
-    shotdistances = [s[1] for s in shotTypeDists]
-    players = [s[2] for s in shotTypeDists]
+        # Do work , convert string timestamps to float values
+        
+        array_out = [getSec(temp) for temp in df.Time]
+        df['Time2'] = array_out
+        
+        #df["Time2"].hist(bins=100)
+        
+        df2 = df[df["Time2"] < 180]
+        df2 = df2[df2["Qtr"] != "4th" ]
+        df2 = df2[df2["Qtr"] != "OT" ]
+        df2 = df2[df2["Qtr"] != "2OT"] 
     
-    # add back in the new calculated variables as columns in the dataframe
+        #qtrs_check = unique(df2.Qtr)
+        #print qtrs_check
     
-    df2["shottype"] =  fgatypes
-    df2["distance"] = shotdistances
-    df2["shooter"] = players
+        df2["MakeMiss"] = [parseMake(temp) for temp in df2.Description]
+        
+        # pick which method to bin epochs with epochTime or epochTime_alt
+        df2["epoch"] = [epochTime(s) for s in df2.Time2]
     
-    points = df2.MakeMiss * df2.shottype
-    df2["points"] = points
-
-    # filter out full court heaves
+        shotTypeDists = [parseShotTypeDistancePlayer(s) for s in df2.Description]
+        fgatypes = [s[0] for s in shotTypeDists]
+        shotdistances = [s[1] for s in shotTypeDists]
+        players = [s[2] for s in shotTypeDists]
+        
+        # add back in the new calculated variables as columns in the dataframe
+        
+        df2["shottype"] =  fgatypes
+        df2["distance"] = shotdistances
+        df2["shooter"] = players
+        
+        points = df2.MakeMiss * df2.shottype
+        df2["points"] = points
     
-    df2 = df2[df2["distance"] < 40] # approx 2-3% of a dataset
+        # filter out full court heaves
+        
+        df2 = df2[df2["distance"] < 40] # approx 2-3% of a dataset
+        
+        # done with basic shot analysis
+        
+        # collect per-team datasets into one big dataset of all teams
+        
+        bigdf = bigdf.append(df2)
+        
+        print "length of big df: ", len(bigdf)
+        
     
-    # done with basic shot analysis
+    # ------------------------------------------
     
-    # collect per-team datasets into one big dataset of all teams
+    # Save all teams dataset to pickle file
+    outfilename = 'shots_allteams.pik'
+    pickle.dump(bigdf, open(outfilename, 'wb'))
     
-    bigdf = bigdf.append(df2)
+    # ------------------------------------------
     
-    print "length of big df: ", len(bigdf)
+    # basic quality check: 
+    # Print out # records
+    # Print out number of teams read in
     
- 
+    print 'Number of records read in: ', len(bigdf)
+    print 'Number of teams: ', len(pd.unique(bigdf['Tm']))
+    
 # ------------------------------------------
- 
-# Save all teams dataset to pickle file
-outfilename = 'shots_allteams.pik'
-pickle.dump(bigdf, open(outfilename, 'wb'))
 
-# ------------------------------------------
-
-# basic quality check: 
-# Print out # records
-# Print out number of teams read in
-
-print 'Number of records read in: ', len(bigdf)
-print 'Number of teams: ', len(pd.unique(bigdf['Tm']))
-
-# ------------------------------------------
-
+# End main
 
 
 

@@ -556,5 +556,76 @@ pearsonr(team_report[filter_shotratediff_only]['shotrate_diff'].sort_index(), te
 # So shotrate_diff is marginally correlated with efg_diff. 
 
 
+# --------- 
+
+# Which teams had the most TFO, epoch 3 shot attempts:
+
+print bigdf[bigdf['epoch'] == 3].groupby('Tm')['points'].count().order()
+
+# ---------
+
+# --------------------------------------------------
+
+# Compare e4 efg to change in efg (e5 - vs e3)
+
+
+# Compare e5 to epoch 4, simply, no differencing. 
+
+filter_epoch4 = bigdf['epoch'] == 4
+
+# calc per-team efg for the selected time period
+team_efg_e4 = bigdf[filter_epoch4].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch4].groupby('Tm')["points"].count()
+
+x = team_efg_e4
+y = team_report['team_efg_diff']
+tfo_extra.plot_scatter_with_reg_overlay(x, y, figurenum = 1051, overlay = True)
+plt.xlabel('team_efg_e4')
+plt.ylabel('efg_diff')
+
+pearsonr(x, y)
+# Out[12]: (-0.29988208012594636, 0.10739082085383068)
+# So efg_e4 kinda of correlates with the efg_diff. 
+
+
+# -----------------------------------------------------
+
+# Final, simplified reasoning of epoch differences. 
+
+
+filter_epoch1 = bigdf['epoch'] == 1
+filter_epoch2 = bigdf['epoch'] == 2
+filter_epoch3 = bigdf['epoch'] == 3
+filter_epoch4 = bigdf['epoch'] == 4
+filter_epoch5 = bigdf['epoch'] == 5
+
+team_efg_e1 = bigdf[filter_epoch1].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch1].groupby('Tm')["points"].count()
+team_efg_e2 = bigdf[filter_epoch2].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch2].groupby('Tm')["points"].count()
+team_efg_e3 = bigdf[filter_epoch3].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch3].groupby('Tm')["points"].count()
+team_efg_e4 = bigdf[filter_epoch4].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch4].groupby('Tm')["points"].count()
+team_efg_e5 = bigdf[filter_epoch5].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch5].groupby('Tm')["points"].count()
+
+# calculate correlations for the different epohcs, vs epoch 5
+
+print pearsonr(team_efg_e5, team_efg_e1)
+print pearsonr(team_efg_e5, team_efg_e2)
+print pearsonr(team_efg_e5, team_efg_e3)
+print pearsonr(team_efg_e5, team_efg_e4)
+
+# (0.41091272199690065, 0.024088814569956266)
+# (0.25616472653484323, 0.17181989037121467)
+# (-0.059337020660216747, 0.75544567941622742)
+# (0.3086740898764998, 0.096985273305257927)
+
+# So in general, shooting correlates, except for in epoch 3 vs epoch 5. 
+# Because something is diff in epoch 3. 
+
+
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e1, figurenum = 2001, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e2, figurenum = 2002, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e3, figurenum = 2003, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e4, figurenum = 2004, overlay = True)
+
+
+
 
 

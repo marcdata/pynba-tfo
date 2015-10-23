@@ -72,3 +72,12 @@ def add_reg_to_axis(a, b, ax):
     # plt.legend(['', rval])
 
     return    
+    
+    
+def update_plot_properties(ax, font_size = 14):
+    ax.title.set_fontsize(font_size)
+    ax.yaxis.label.set_fontsize(font_size)
+    ax.xaxis.label.set_fontsize(font_size)
+    
+    
+    

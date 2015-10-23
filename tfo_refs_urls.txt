@@ -1,0 +1,47 @@
+refs and urls:
+
+a.nbcsports.com/2015/02/27/daryl-morey-believes-two-bad-shots-are-better-than-one-good-shot-always-but-data-wasnt-significant-enough-for-jeff-van-gundy-to-change/
+Daryl Morey and JVG / TFO tactic can get 1 extra win, every two years. 
+
+Ken Pom (2013):
+http://kenpom.com/blog/index.php/weblog/entry/how_much_are_two_for_ones_worth
+Net: 0.2 pt advantage by going for that tactic. Did not really see drop off in offensive efficiency (on per possession basis), 97.5 vs 94.6. 
+Also, net effects is more of a 2:1.5 possession advantage (kind of like what I saw in my game-log results, fyi). Not a full 2:1 possession adv.
+"But after going through this analysis, I’m going to move the two-for-one down on my list of strategic outrages."
+
+Marginal Revolution:
+http://marginalrevolution.com/marginalrevolution/2011/03/endgames-for-basketball-the-2-for-1.html
+
+
+Nylon Calculus
+http://nyloncalculus.com/2014/11/11/answer-form-another-question-where-analytics-hits-the-wall/
+(in second half of post)
+
+Memphis post 
+http://www.grizzlybearblues.com/2013/11/27/5149274/grizzlies-numbers-crunch-how-analytics-are-failing-in-memphis
+
+Jey Feng
+http://www.racketracer.com/2015/05/12/analytics-of-optimal-2-for-1-strategy-in-nba-basketball/
+https://github.com/jayfeng1/TwoForOne-Analytics
+
+basic nba definition:
+http://www.nba.com/canada/Basketball_U_on_Timing-Canada_Generic_Article-18062.html
+"Two for One
+A two for one is a strategic decision based on the time left on the clock. At the end of a quarter or the first half, a team may take a quick shot in order to gain possession for the last shot of the quarter. By shooting quickly, the offensive team gets two possessions to end the quarter, while the opposing team only gets one shot. This gives the team two opportunities to score and to gain momentum going into the next quarter.
+A player that can create his own shot in the closing seconds of a half or game, known as a go-to guy, may be the difference between winning and losing."
+
+the CSE MSU paper
+http://www.cse.msu.edu/~roger202/docs/Rogers_Immink_2for1Analysis.pdf
+- Some info on timing: "This means, teams should be looking to shoot within
+the range of 30 to 37 seconds left in the quarter, but at no specific time."
+- Also, they notice that "defending team" does better on scoring efficiency when they only get 1 possession, so improvement for the team that doesn't get the TFO. 
+"They shot an astounding 52.6% from the field, whereas the league average during the
+2011-2012 regular season was a modest 44.8%. (3)" // so +08% on FG%
+- The study has a weird prior condition on the situation, and isn't so great for "in the wild" effectiveness. (They clean out certain types of turnovers, etc.)
+"The initiating team must have exactly two possessions and the defending team must have
+exactly one possession" // so no idea how often you initiate, and then the TFO fails to pay off. 
+
+Quora:
+https://www.quora.com/How-does-a-two-for-one-situation-at-the-close-of-an-NBA-game-work
+(just discussion, no data)
+

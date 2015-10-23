@@ -2,6 +2,12 @@
 # Script for doing main, team-level analysis
 # do per-minute analysis
 # 
+# Version 2: Cutting out individual team plots. 
+# Streamlining some of the global calculations. 
+#
+# Version3: splitting out 2s from 3s, in Figure 8 (per-minute analysis). 
+
+
 
 # -----------------------------------------------------------------------------
 
@@ -24,6 +30,11 @@ def movingaverage (values, windowsize):
     smoothed = np.convolve(values, weights, 'same')
     return smoothed
 
+def movingaverage2 (values, windowsize):
+    weights = np.repeat(1.0, windowsize)/windowsize
+    smoothed = np.convolve(values, weights, 'same')
+    return smoothed
+    
 # -----------------------------------------------------------------------------
 
 # Some prepatory basics
@@ -38,193 +49,50 @@ bigdf = pickle.load(open(outfilename, 'rb'))
 
 # -----------------------------------------------------------------------------
 
-# per-team analysis 
-
-# Do loop, and crank out some per-team calcs: efg, shot_rate_diffs, etc
-# plot per team figs
-
-# pre: bigdf exists, loaded
-
-tfo_gooses = []
-fg_deltas = []
-efg_deltas = []
-teams_out = []
-filter_team = []
-
-efgs_e3 = []
-efgs_e5 = []
-efgs_e3_threes = []
-efgs_e5_threes = []
-
-i=0
-for tn in teamnames:   
-
-    # filter by team // column = bigdf['Tm']
-    filter_team = bigdf['Tm']==tn
-    teamdf = bigdf[filter_team]
-    
-    # divide and analyze by 3pt shot type too
-    
-    filter3s = teamdf["shottype"]==3
-    
-    # use all shots
-    grouped = teamdf.groupby("epoch")
-    grouped_threesonly = teamdf[filter3s].groupby("epoch")
-    
-    # filter to look at 3pt FGA only
-    # grouped = df2[filter3s].groupby("epoch")
-    
-    grouped["MakeMiss"].sum()
-    grouped["MakeMiss"].count()
-    
-    fg_perc = grouped["MakeMiss"].sum()  / grouped["MakeMiss"].count()
-    
-    pts = grouped["points"].sum()
-    fga = grouped["points"].count()
-    
-    efg = 0.5*pts/fga
-    
-    # same but for 3pt shots only
-
-    fg_perc = grouped_threesonly["MakeMiss"].sum()  / grouped_threesonly["MakeMiss"].count()
-    pts_3s = grouped_threesonly["points"].sum()
-    fga_3s = grouped_threesonly["points"].count()
-    efg_3s = 0.5*pts_3s/fga_3s
-
-    print "Team: ", tn
-    print "fg % and eFG% by epoch \n", "fg% \n", fg_perc, '\n', "efg \n", efg
-    
-    # shot rate
-    # "shots a second" in the fga, aka // sum of freq counts of the bins in a hist of time2
-    # proxy for how often a team goes for a 2for1 situation
-    shot_rate = fga/[5, 23, 7, 25, 120]
-    shot_rate = fga/[5, 22, 9, 24, 120]
-    
-    shot_rate = fga/[5, 22, 9, 24, 120]
-    
-    # shot rate division for alt epoch bins
-    shot_rate = fga/[5, 22, 9, 29, 115]
-    
-    # Final shot rate bin sizes
-    shot_rate = fga/[5, 22, 9, 29, 115]
-    
-    print "shot rate", '\n', shot_rate
-    
-    # calc summary stats for xy plot later
-    # old method: base_shotrate = (shot_rate[4]+shot_rate[5])/2
-    base_shotrate = shot_rate[5]
-    
-#    tfo_goose = (shot_rate[3]-shot_rate[4]+)/shot_rate[4]
-    tfo_goose = (shot_rate[3]-base_shotrate)/base_shotrate
-    tfo_efgdrop = (efg[3]-efg[5])
-    tfo_fgpdrop = (fg_perc[3]-fg_perc[5])
-    
-    print "Team: ", tn, " TFO_Goose", tfo_goose, " EFG Change: ", tfo_efgdrop, " FGP Change: ", tfo_fgpdrop
-    
-    teams_out.append(tn)
-    tfo_gooses.append(tfo_goose)
-    efg_deltas.append(tfo_efgdrop)
-    fg_deltas.append(tfo_fgpdrop)
-    
-    
-    # Plot figure for eFG for team, by epoch (time remaining in qtr)
-    fig = plt.figure(20+i)
-    ax = fig.add_subplot(111)
-    
-    width = 0.5
-    ax.bar([1,2,3,4,5], efg, width)
-
-    ax.set_ylabel('eFG%')     #('Count of FGA')
-    ax.set_xlabel('Seconds Remaining in Quarter')
-    ax.set_title(tn)
-    #ax.set_title('When Shots Happen At End of Quarters')
-    xTickMarks = ['0-4', '5-26', '27-35', '36-60', '61-180']
-    ax.set_xticks(np.arange(5)+1+(width/2))
-    xtickNames = ax.set_xticklabels(xTickMarks)
-    plt.setp(xtickNames, fontsize=10)
-
-    ax.set_xlim([0.5, 6])
-    plt.show()
-    
-    # ending loop, increment manual counter (bc figure are broken)
-    i = i+1
-    
-# end loop
-
-# ------------------------------------------
-
-# close some plots 
-for fnum in np.arange(20, 50):
-    plt.close(fnum)
-
-
-
-# -----------------------------------------
-
-# first cut calculations
-
-# --------------------------------------------
-
-# Generate table of team comparison points, efg_differnetial, etc
-
-# Want: efg_diff, efg_diff_3ptshots_only
-d = {'efg_diff': efg_deltas}
-teamstats_df = pd.DataFrame(data = d, index = teams_out)
-teamstats_df['Tm'] = teams_out
-teamstats_df['efg_diff'] = efg_deltas
-
-
-
-
 
 # ---------------------------------------------
 
-# Summary charts
+# Leftover from prev per-team analysis. 
 
-fig_team_scat = plt.figure(2)
-fig_team_scat.clf()
-ax_scat = fig_team_scat.add_subplot(111)
-
-ax_scat.scatter(tfo_gooses, efg_deltas)
-
-ax_scat.set_ylabel('Change in eFG%')     
-ax_scat.set_xlabel('Change in Shooting Rate')
-
-# add labels for each x,y point. Identify with team name (short name triple)
-for label, x, y in zip(teams_out, tfo_gooses, efg_deltas):
-    plt.annotate(
-        label, 
-        xy = (x, y), xytext = (5, 5), textcoords = 'offset points')
-
-plt.show()
-
-from scipy.stats.stats import pearsonr   
-
-print pearsonr(tfo_gooses,efg_deltas)
+## Summary charts
+#
+#fig_team_scat = plt.figure(2)
+#fig_team_scat.clf()
+#ax_scat = fig_team_scat.add_subplot(111)
+#
+#ax_scat.scatter(tfo_gooses, efg_deltas)
+#
+#ax_scat.set_ylabel('Change in eFG%')     
+#ax_scat.set_xlabel('Change in Shooting Rate')
+#
+## add labels for each x,y point. Identify with team name (short name triple)
+#for label, x, y in zip(teams_out, tfo_gooses, efg_deltas):
+#    plt.annotate(
+#        label, 
+#        xy = (x, y), xytext = (5, 5), textcoords = 'offset points')
+#
+#plt.show()
+#
+#from scipy.stats.stats import pearsonr   
+#
+#print pearsonr(tfo_gooses,efg_deltas)
 
 # (-0.28226186560180239, 0.14559286204854066)
 # (-0.30600024812464699, 0.1000656721856395)
 # (-0.26979766638641567, 0.14934558828826472)
-# various correlation results, varying epoch 3 bin limits slightly
+# various correlation results, varying epoch 3 bin cutoffs slightly
 
 # --------------------------------------------
 
-# Generate table of team comparison points, efg_differnetial, etc
     
 
+# ------------------------------------------------------------------------------
 
+# Per-second analysis
 
+# ------------------------------------------------------------------------------
 
-
-
-
-
-
-
-# ----------------------------------------------------------------------------------------
-
-# per-minute analysis
-
+# Data cleaning issue, spike in shot counts at ~ 60 seconds.
 
 g2 = bigdf.groupby('Time2')
 
@@ -234,36 +102,210 @@ efg = 0.5*pts/fga
 nshots = g2['points'].count()
 
 fig_time = plt.figure(3)
+fig_time.clf()
 ax_persec = fig_time.add_subplot(211)
 ax_persec.bar(nshots.index, nshots.values, width = 1)
 
-# filter_team = (bigdf['Tm'] == 'CLE') | (bigdf['Tm'] == 'HOU') | (bigdf['Tm'] == 'SAS') 
+# Add annotation (arrow), show data blip.
 
-filter_threes_only = bigdf['shottype'] == 3
-# ---
+ax_persec.annotate('Spike in # shots', xy=(70, 600), xytext=(100, 800),
+    arrowprops=dict(color = 'black', facecolor='black', width = 1, shrink=0.05))
+    
+    
+# ---------------
+
+# Create a filter to drop out spike in data. // Different from epoch'ing method.
 
 filter_noblip1 = bigdf['Time2'] < 60
 filter_noblip2 = bigdf['Time2'] > 60
 filter_noblip = filter_noblip1 | filter_noblip2
 
-ax_persec2 = fig_time.add_subplot(212)
-g3 = bigdf[filter_threes_only & filter_noblip].groupby('Time2')
+# ---------------
 
+ax_persec2 = fig_time.add_subplot(212)
+# g3 = bigdf[filter_threes_only & filter_noblip].groupby('Time2')
+g3 = bigdf[filter_noblip].groupby('Time2')
 pts = g3["points"].sum()
 fga = g3["points"].count()
 fg_perc = g3['MakeMiss'].mean()
 efg = 0.5*pts/fga
-
 nshots2 = g3['points'].count()
 
 ax_persec2.bar(nshots2.index, nshots2.values, width = 1)
+
+ax_persec2.set_xlabel('Seconds Remaining in Quarter')
+ax_persec2.set_ylabel('# Shots')
+ax_persec.set_ylabel('# Shots')
+
+# -----------------------------------------------------------------
 
 fig_persec_efg = plt.figure(4)
 ax_efgsec = fig_persec_efg.add_subplot(111)
 ax_efgsec.plot(nshots2.index, fg_perc)
 
+# -----------------------------------------------------------------
 
+
+# Split out between twos and threes / by ShotType
+
+filter_threes_only = bigdf['shottype'] == 3
+filter_twos_only = bigdf['shottype'] == 2
+
+grouped_shots_3s_only = bigdf[filter_threes_only & filter_noblip].groupby('Time2')
+grouped_shots_2s_only = bigdf[filter_twos_only & filter_noblip].groupby('Time2')
+
+# only need counts and mean of points
+
+fga_twos = grouped_shots_2s_only["points"].count()
+fga_threes = grouped_shots_3s_only["points"].count()
+
+efg_twos = grouped_shots_2s_only["points"].mean()/2
+efg_threes = grouped_shots_3s_only["points"].mean()/2
+
+nshots_threes = grouped_shots_3s_only['points'].count()
+nshots_twos = grouped_shots_2s_only['points'].count()
+
+# ---
+
+# Plot the eFG's by shottype, per minute. Add smoothing. 
+
+figure8 = plt.figure(208)
+figure8.clf()
+ax = figure8.add_subplot(111)
+
+seconds_index = nshots_twos.index
+
+# Could use the same index (x-axis, minute counts), but later cleanup. 
+
+# Plot smoothed versions, in color
+# Window size 9 or 11 probably the best overall balance between smoothing and 
+# temporal resolution. 
+
+window_size = 11
+
+ax.plot(seconds_index, 100 * movingaverage(efg_threes, window_size), 'r')
+ax.plot(seconds_index, 100 * movingaverage(efg_twos, window_size), 'b')
+# Add third, plot, smoother version of threes (better baseline comparison). Taken out for now. 
+# ax.plot(seconds_index, movingaverage(efg_threes, 21), 'b:')
+
+# Plot unsmoothed version, in grayscale
+ax.plot(nshots_threes.index, 100* efg_threes, ':', color = '0.7')
+ax.plot(nshots_twos.index, 100 * efg_twos, color = '0.8')
+
+# set lims. Note: xlims need to account for smoothing. Low-end of 
+# x-axis bitten off by box-smoothing, not accurate below x=windowsize/2.
+ax.set_xlim([window_size/2, 80])
+# ax.set_ylim([0.3, 0.75])
+ax.set_ylim([30, 75])
+
+# Add legend. Make sure matches plotting order.
+
+ax.legend(['3s smoothed', '2s smoothed', '3s raw', '2s raw'], loc = 'lower right')
+
+# Title, label axes, etc
+ax.set_title('Shot Efficiency At End of Quarters, by Shot Type (2pt or 3pt)')
+ax.set_xlabel('Seconds Remaining in Quarter')
+ax.set_ylabel('eFG %')
+
+# Add annotation (arrow), emphasizing drop in 3pt %
+
+ax.annotate('Drop in 3pt efficiency', xy=(27, 60), xytext=(41, 70),
+    arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+
+plt.show()
+
+
+# --------------------------------------------------------------
+
+# Shot counts by type? 
+
+fig99 = plt.figure(209)
+ax_counts = fig99.add_subplot(111)
+
+ax_counts.plot(nshots_threes.index, nshots_threes, 'r')
+ax_counts.plot(nshots_twos.index, nshots_twos, 'b')
+ax_counts.legend(['3 pt', '2 pt'])
+plt.show()
+
+# ----------------------------------------
+
+
+
+
+
+
+
+
+
+
+# -----------------------------------------
+
+
+# similar as 208, but with 2 drop arrows, vertical. 
+
+# Plot the eFG's by shottype, per minute. Add smoothing. 
+
+# Alternate version of Figure 208 -- with bar timeperiod highlight 
+# vs the red arrow 
+
+figure210 = plt.figure(210)
+figure210.clf()
+ax = figure210.add_subplot(111)
+
+seconds_index = nshots_twos.index
+
+# Could use the same index (x-axis, minute counts), but later cleanup. 
+
+# Plot smoothed versions, in color
+# Window size 9 or 11 probably the best overall balance between smoothing and 
+# teporal resolution. 
+
+window_size = 11
+
+ax.plot(seconds_index, 100 * movingaverage(efg_threes, window_size), 'r', linewidth=2.0)
+ax.plot(seconds_index, 100 * movingaverage(efg_twos, window_size), 'b', linewidth=2.0)
+# Add third, plot, smoother version of threes (better baseline comparison). Taken out for now. 
+# ax.plot(seconds_index, movingaverage(efg_threes, 21), 'b:')
+
+# Plot unsmoothed version, in grayscale
+ax.plot(nshots_threes.index, 100* efg_threes, ':', color = '0.6')
+ax.plot(nshots_twos.index, 100 * efg_twos, color = '0.6')
+
+# set lims. Note: xlims need to account for smoothing. Low-end of 
+# x-axis bitten off by box-smoothing, not accurate below x=windowsize/2.
+ax.set_xlim([window_size/2, 80])
+# ax.set_ylim([0.3, 0.75])
+ax.set_ylim([30, 75])
+
+# Add legend. Make sure matches plotting order.
+
+ax.legend(['3s smoothed', '2s smoothed', '3s raw', '2s raw'], loc = 'lower right')
+
+# Title, label axes, etc
+ax.set_title('Shot Efficiency At End of Quarters, by Shot Type (2pt or 3pt)')
+ax.set_xlabel('Seconds Remaining in Quarter')
+ax.set_ylabel('eFG %')
+
+# REM Add annotation (arrow), emphasizing drop in 3pt %
+
+# REM ax.annotate('Drop in 3pt efficiency', xy=(27, 60), xytext=(41, 70),
+# REM   arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+
+# Add annotation, emphasize drop, but highlight start, end times. T = 27, 40.
+# or two arrows? To start and end times?
+
+ax.annotate('Drop in 3pt efficiency', xy=(41, 64), xytext=(41, 72),
+    arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
+ax.annotate('', xy=(27, 55), xytext=(27, 72),
+    arrowprops=dict(color = 'red', facecolor='red', width = 1, shrink=0.05))
     
+    
+tfo_extra.update_plot_properties(ax)
+
+plt.show()
+
+
+# ---------------------------------------
 
 
 # ----------------------------------------
@@ -355,6 +397,11 @@ for tn in teamnames:
 # categorize teams based on their shot rank (how often they're shooting in this window)
 b = pd.Series(shots2, index=teams2)
 b.sort(ascending = False)
+
+# Generate mappings into thirds, top third, middle third, lower third, numbered 1,2,3 respectively. 
+# Generate mappings into fourths, similarly, numbered 1,2,3,4. 
+# Qs and Ts Maps Team-Name into Grouping. 
+
 quartiles = np.concatenate((np.repeat(1,8), np.repeat(2,7), np.repeat(3,7), np.repeat(4,8)))
 tripiles = np.concatenate((np.repeat(1,10), np.repeat(2,10), np.repeat(3,10)))
 qs = pd.Series(quartiles, index=b.index)
@@ -499,7 +546,7 @@ g['points'].mean()/2
 #Name: points, dtype: float64
 
 
-# -------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Some basic comparisons, similar to teaml-level, and player-level calcs.
 
@@ -520,11 +567,12 @@ shotcounts_byType_e5 = bigdf[filter_epoch5].groupby("shottype").size()
 proportion3s_e3 = shotcounts_byType_e3[3]/float(shotcounts_byType_e3[2]+shotcounts_byType_e3[3])
 proportion3s_e5 = shotcounts_byType_e5[3]/float(shotcounts_byType_e5[2]+shotcounts_byType_e5[3])
 
-print proportion3s_e3
-print proportion3s_e5
-
-# Need this in a figure 
-
+print '\n'
+print 'Summary Results: '
+print '\n'
+print 'Proportion of shots that are 3pt attempts, epoch 3: ', '%.2f' % proportion3s_e3
+print 'Proportion of shots that are 3pt attempts, epoch 5: ', '%.2f' % proportion3s_e5
+print '\n'
 
 
 # --------------------
@@ -537,6 +585,11 @@ threeperc_e3 = three_pt_perc[3]
 threeperc_e5 = three_pt_perc[5]
 threeperc_diff = threeperc_e3 - threeperc_e5 
 
+print '3pt fg %, epoch 3: ', '%.2f' % threeperc_e3
+print '3pt fg %, epoch 5: ', '%.2f' % threeperc_e5
+print 'Change in 3pt fg %: ', '%.2f' % threeperc_diff
+print '\n'
+
 
 # ------------------
 
@@ -546,6 +599,16 @@ team_efg_e3 = bigdf[filter_epoch3]["points"].sum()*0.5/bigdf[filter_epoch3]["poi
 team_efg_e5 = bigdf[filter_epoch5]["points"].sum()*0.5/bigdf[filter_epoch5]["points"].count()
 team_efg_diff = team_efg_e3 - team_efg_e5
 
+print 'Overall eFG %, epoch 3: ', '%.2f' % team_efg_e3
+print 'Overall eFG %, epoch 5: ', '%.2f' % team_efg_e5
+print 'Change in Overall eFG %: ', '%.2f' % team_efg_diff
+print '\n'
+
+#threeperc_diff
+#Out[65]: -0.035369015858490949
+#
+#team_efg_diff
+#Out[66]: -0.02197808731244405
 
 
 # -------------------------------------------------------

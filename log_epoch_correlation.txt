@@ -1,0 +1,118 @@
+
+
+# -----------------------------------------------------
+
+# Final, simplified reasoning of epoch differences. 
+
+
+filter_epoch1 = bigdf['epoch'] == 1
+filter_epoch2 = bigdf['epoch'] == 2
+filter_epoch3 = bigdf['epoch'] == 3
+filter_epoch4 = bigdf['epoch'] == 4
+filter_epoch5 = bigdf['epoch'] == 5
+
+team_efg_e1 = bigdf[filter_epoch1].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch1].groupby('Tm')["points"].count()
+team_efg_e2 = bigdf[filter_epoch2].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch2].groupby('Tm')["points"].count()
+team_efg_e3 = bigdf[filter_epoch3].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch3].groupby('Tm')["points"].count()
+team_efg_e4 = bigdf[filter_epoch4].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch4].groupby('Tm')["points"].count()
+team_efg_e5 = bigdf[filter_epoch5].groupby('Tm')["points"].sum()*0.5/bigdf[filter_epoch5].groupby('Tm')["points"].count()
+
+# calculate correlations for the different epohcs, vs epoch 5
+
+print pearsonr(team_efg_e5, team_efg_e1)
+print pearsonr(team_efg_e5, team_efg_e2)
+print pearsonr(team_efg_e5, team_efg_e3)
+print pearsonr(team_efg_e5, team_efg_e4)
+
+# (0.41091272199690065, 0.024088814569956266)
+# (0.25616472653484323, 0.17181989037121467)
+# (-0.059337020660216747, 0.75544567941622742)
+# (0.3086740898764998, 0.096985273305257927)
+
+# So in general, shooting correlates, except for in epoch 3 vs epoch 5. 
+# Because something is diff in epoch 3. 
+
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e1, figurenum = 2001, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e2, figurenum = 2002, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e3, figurenum = 2003, overlay = True)
+tfo_extra.plot_scatter_with_reg_overlay(team_efg_e5, team_efg_e4, figurenum = 2004, overlay = True)
+
+
+
+
+# 
+Section -- espn season average shooting data vs the efg in each epoch.
+
+season avg vs epoch 5: 
+(0.81549272252163574, 4.0378399944744899e-08)
+season avg vs epoch 4: 
+(0.42785093451288075, 0.018346954168638345)
+season avg vs epoch 3: 
+(0.13073341070140868, 0.49107855614736429)
+season avg vs epoch 2: 
+(0.37861269977355372, 0.039098513528723983)
+season avg vs epoch 1: 
+(0.46303466707202551, 0.0099741143348143855)
+
+# n's for epochs / 
+
+bigdf.groupby(['epoch'])['points'].count()
+#Out[47]: 
+#epoch
+#1     3659
+#2     3329
+#3     2626
+#4     6618
+#5    24147
+#Name: points, dtype: int64
+
+
+# so on average, each team in Epoch 3 gets calculated using n=87. 
+So small n shouldn't be an issue here. (Or at least the biggest issue.)
+
+# --------------------
+
+# Alt indicators:
+
+pearsonr(team_efg_e2.sort_index(), team_report['team_efg_diff'].sort_index())
+Out[106]: (-0.41937599226103978, 0.021059211146296469)
+
+
+pearsonr(team_efg_e2, team_efg_e5)
+Out[98]: (0.25616472653484323, 0.17181989037121467)
+
+-- 
+
+pearsonr(team_efg_e4.sort_index(), team_report['team_efg_diff'].sort_index())
+Out[111]: (-0.17345602926606074, 0.35931891626367707)
+
+pearsonr(team_efg_e2.sort_index(), team_report['team_efg_diff'].sort_index())
+Out[112]: (-0.41937599226103978, 0.021059211146296469)
+
+mean([.17, .41, .24])
+Out[114]: 0.27333333333333332
+
+so maybe r is closer to 0.3 ?
+# depends on assmptions made about "shooting ability" and..
+whether that would be expressed better in "all shots" vs "standard shot in e2"
+vs "potential noise, variability in e4."
+
+There's a pretty good case to be made that epoch 2, with less time constraints, 
+patience, etc, and "trying to get a quality shot" (vs trying to do other game things?)
+would make e2 shots more reflective of actual shooting ability of a team (including shot creation). 
+
+
+
+
+-------------
+
+at the player level, shot rate, and taking mroe shtos didn't really seem to make any difference
+for the accuracy of those shots. 
+
+pearsonr(player_report['shotrate_diff'], player_report['plyr_efg_diff'])
+Out[216]: (-0.13717734578745189, 0.34213388242860054)
+
+n = top 30 most frequent shooters in the TFO window. 
+
+
+

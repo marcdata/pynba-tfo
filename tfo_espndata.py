@@ -11,6 +11,8 @@ import tfo_extra
 
 import matplotlib.pyplot as plt
 
+from scipy.stats.stats import pearsonr   
+
 # -----------------------------------
 
 filepre = "c://Users/Marc/Documents/nbadata/"
@@ -65,6 +67,46 @@ tfo_extra.plot_scatter_with_reg_overlay(df_espn['AFG%'].sort_index(), team_repor
 
 plt.xlabel('regular season eFG%')
 plt.ylabel('eFG% in epoch 5')
+
+print pearsonr(df_espn['AFG%'].sort_index(), team_report['team_efg_e5'].sort_index())
+# results: (0.81549272252163574, 4.0378399944744899e-08)
+
+# ------------
+
+
+# Ok -- do some code // team_efg_e4 defined in alternate file (tfo_team_report)
+
+print "season avg vs epoch 5: "
+print pearsonr(df_espn['AFG%'].sort_index(), team_report['team_efg_e5'].sort_index())
+
+print "season avg vs epoch 4: "
+print pearsonr(df_espn['AFG%'].sort_index(), team_efg_e4)
+# results: (0.42785093451288075, 0.018346954168638345)
+
+print "season avg vs epoch 3: "
+print pearsonr(df_espn['AFG%'].sort_index(), team_efg_e3)
+# results: (0.13073341070140868, 0.49107855614736429)
+
+print "season avg vs epoch 2: "
+print pearsonr(df_espn['AFG%'].sort_index(), team_efg_e2)
+# results: (0.37861269977355372, 0.039098513528723983)
+
+print "season avg vs epoch 1: "
+print pearsonr(df_espn['AFG%'].sort_index(), team_efg_e1)
+# results: (0.46303466707202551, 0.0099741143348143855)
+
+# n's for epochs / 
+
+bigdf.groupby(['epoch'])['points'].count()
+#Out[47]: 
+#epoch
+#1     3659
+#2     3329
+#3     2626
+#4     6618
+#5    24147
+#Name: points, dtype: int64
+
 
 
 # ------------------------

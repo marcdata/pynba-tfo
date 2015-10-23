@@ -405,3 +405,17 @@ pd.crosstab(game_qtr_results['tfo_winner'], game_qtr_results['team_a_total_shots
 # Divided by six because 3 quarters (dropping 4th), and 2 teams.  
 # But game totals pretty much match up, so not missing any data. 
 # ----
+
+# ----------------------------------------------------
+
+# Calculate, count the number of games in the dataset. 
+
+# Divide keys by 2, because each game represented from each team as "main team"
+# vs opponent. So DAL-LAL also exists as LAL-DAL on a given date.
+
+num_games = bigdf.groupby(['Tm', 'Date'])
+
+print "Number of games: ", len(num_games.indices)/2
+
+# ----------------------------------------------------
+

@@ -1,6 +1,25 @@
 
 
+""" Quick analysis of what's going on with Houston shooting. What's driving the difference 
+between baseline shooting efficiency and epoch 3 shooting efficiency.
 
+Focusing on splits between Harden vs Everybody Else.
+Mostly all shot eFG% and 3pt shot eFG, and shot counts. 
+Looked at changes in shooting distance towards the end, but not much changed.
+
+Not really programmatic, just a script to run interactively. 
+
+Output: tables, etc, printed out at the prompt.
+
+"""
+
+# -------------------------------------------------------------------------
+
+# Pre: bigdf dataset loaded already. 
+
+# -------------------------------------------------------------------------
+
+# set up filters for Harden, non-Harden splits. Harden is one player for Houston.
 
 filter_hou = bigdf['Tm'] == 'HOU'
 
@@ -19,18 +38,33 @@ filter_3pt_attempts = subset_hou['shottype'] == 3
 # how shooters besides Harden do, in epochs
 grp = subset_hou[filter_notharden & filter_3pt_attempts].groupby('epoch')
 
-grp['points'].mean()
-grp['points'].count()
+# Print out a mini-report
+
+print "\n Houston, non-Harden,3-pt,  mean points by epoch:"
+print grp['points'].mean()
+print "\n non-Harden, 3-pt, shot counts by epoch:"
+print grp['points'].count()
+print "\n non-Harden all shots, mean points per shot, by epoch: "
+print subset_hou[filter_notharden].groupby('epoch')['points'].mean()
+print "\n non-Harden all shots, shot counts by epoch: "
+print subset_hou[filter_notharden].groupby('epoch')['points'].count()
+print "\n"
 
 # how Harden compares, by epochs
 
-subset_hou[filter_harden & filter_3pt_attempts].groupby('epoch')['points'].mean()
-subset_hou[filter_harden & filter_3pt_attempts].groupby('epoch')['points'].count()
+print "\n Harden, 3-pt, mean points by epoch:"
+print subset_hou[filter_harden & filter_3pt_attempts].groupby('epoch')['points'].mean()
+print "\n Harden, 3-pt shot counts by epoch:"
+print subset_hou[filter_harden & filter_3pt_attempts].groupby('epoch')['points'].count()
+print "\n Harden all shots, mean points per shot, by epoch: "
+print subset_hou[filter_harden].groupby('epoch')['points'].mean()
+print "\n Harden, all shot counts by epoch:"
+print subset_hou[filter_harden].groupby('epoch')['points'].count()
+print "\n"
 
-# 3 pt shots specifically
-
+# 3 pt shots specifically is most of the differnece.
 # That's basically the story. 
-
+# Harden 3pt shooting:
 # epoch
 #1    1.200000
 #2    1.285714
@@ -69,16 +103,6 @@ subset_hou[filter_harden & filter_3pt_attempts].groupby('epoch')['points'].count
 
 
 # Distance was a non-factor. Misses were actually closer than Makes.
-
-
-
-
-
-
-
-
-
-
 
 
 

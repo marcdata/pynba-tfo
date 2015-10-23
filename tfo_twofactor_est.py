@@ -11,13 +11,19 @@ import statsmodels.api as sm
 
 # set X and Y as columns from team_report
 
-X = team_report[['team_efg_e5', 'shotrate_diff']]
+# X = team_report[['team_efg_e5', 'shotrate_diff']]
+
+X = [team_efg_e2, team_report['shotrate_diff']]
+
+# team_efg_2 prev defined. 
+newx = pd.concat([team_efg_e2, team_report['shotrate_diff']], axis = 1)
+X = newx
 
 y = team_report[['team_efg_diff']]
 
 ## fit a OLS model with intercept on team_efg_e5 and shotrate_diff
 X = sm.add_constant(X)
-est = sm.OLS(y, X).fit()
+est = sm.OLS(y.sort_index(), X.sort_index()).fit()
 
 est.summary()
 

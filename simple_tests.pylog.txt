@@ -1,0 +1,25 @@
+ 
+
+In [14]: (x_efg3['HOU'] - mean(x_efg3))/std(x_efg3)
+Out[14]: -1.59979049015324
+
+In [15]: (x_efg3['HOU'] - mean(team_report['team_efg_e5']))/std(team_report['team_efg_e5'])
+Out[15]: -3.8762507960459955
+
+In [16]: (mean(x_efg3) - mean(team_report['team_efg_e5']))/std(team_report['team_efg_e5'])
+Out[16]: -0.73939003593668351
+
+
+
+
+# ---------------
+
+# Double checking uniqueness in shot data 
+
+temp_filt2 = bigdf['Date'] == '2014-10-29'
+
+temp_filt = (bigdf['Tm'] == 'TOR') | (bigdf['Tm'] == 'ATL')
+
+bigdf[temp_filt & temp_filt2].groupby(['Tm', 'shooter'])['points'].count()
+
+
