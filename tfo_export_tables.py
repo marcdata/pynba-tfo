@@ -83,6 +83,7 @@ def export_team_table_excel():
     worksheet.set_column('C:C', col_width+4, percent_fmt)
     worksheet.set_column('H:H', 14)
     worksheet.set_column('I:J', col_width+4, percent_fmt)
+    worksheet.set_column('K:K', col_width, decimal_fmt)
     worksheet.set_column('L:L', col_width+4, decimal_fmt)
     worksheet.set_column('M:M', col_width, percent_fmt)
     
@@ -128,7 +129,7 @@ def export_player_table_excel():
     workbook = writer.book
     worksheet = writer.sheets['report']
     
-    # Do some formatting.   Display percentages as percent. 
+    # Do some formatting. Display percentages as percent. 
     
     percent_fmt = workbook.add_format({'num_format': '0.0%'})
     decimal_fmt = workbook.add_format({'num_format': '0.00'})
@@ -183,6 +184,12 @@ def export_tables_to_excel():
 
 # End export_tables_to_excel
 
+def main():
+    export_tables_to_excel()
+    
+# End
+# That's it, we're just looking to do a basic export-to-excel on main run. 
+
         
     
 # -------------------------------------------------------------
@@ -205,30 +212,6 @@ import mysql.connector
 con = mysqldb.connect()
 
 
-
-# ----------------
-
-
-try:
-    from io import BytesIO
-except ImportError:
-    from cStringIO import StringIO as BytesIO
-
-bio = BytesIO()
-
-# By setting the 'engine' in the ExcelWriter constructor.
-writer = ExcelWriter(bio, engine='xlsxwriter')
-
-
-
-# ------------------------------
-
-from sqlalchemy import create_engine
-
-# default
-engine = create_engine('mysql://mysql:mysql@localhost/world')
-
-
 # ---------------------------------
 
 
@@ -248,107 +231,8 @@ con = mysql.connector.connect(host='localhost',database='world',user='root',pass
 
 con_nba = mysql.connector.connect(host='localhost',database='nbashots',user='root',password='mysql')
 
-# default
-import mysqldb
-
-engine = create_engine('mysql://mysql:mysql@localhost/nbashots')
 
 
-cursor.execute("")
-row = cursor.fetchone()
-
-# -------------------------------------
-
-short_table = player_report.head(30).sort(['plyr_efg_diff'])
-
-short_table[['fga_e3_n', 'plyr_efg_diff', 'plyr_efg_e3', 'plyr_efg_e5', 'shotrate_diff', 'threeperc_diff']]
-
-
-# --------------------------------------
-
-TABLES = {}
-TABLES['team_tfo_perf'] = (
-    "CREATE TABLE `team_tfo_perf` ("
-    "  `team_no` int(11) NOT NULL AUTO_INCREMENT,"
-    "  `team_name` varchar(3) NOT NULL,"
-    "  `fga_e3_n` int(4) NOT NULL, "
-    "  `team_efg_e3` float(4,2), "
-    "  `team_efg_e5` float(4,2), "
-    "  `team_efg_diff` float(4,2), "
-    "  PRIMARY KEY (`team_no`), KEY `team_no` (`team_no`)"
-    ") ENGINE=InnoDB")
-
-TABLES['teams'] = (
-    "CREATE TABLE `teams` ("
-    "  `team_no` int(11) NOT NULL AUTO_INCREMENT,"
-    "  `team_name` varchar(3) NOT NULL,"
-    "  `full_name` varchar(60), "
-    "  `city` varchar(30), "
-    "  PRIMARY KEY (`team_no`), KEY `team_name` (`team_name`)"
-    ") ENGINE=InnoDB")
-
-
-
-#name, ddl in TABLES.iteritems():
-#    try:
-#        print("Creating table {}: ".format(name), end='')
-#        cursor.execute(ddl)
-#    except err:
-#        print 'failed: ', err.msg
-#        
-
-
-cursor = con_nba.cursor()
-cursor.execute(TABLES['team_tfo_perf'])
-
-cursor.execute(TABLES['teams'])
-
-# ok - made table 
-
-# ----------------------------
-
-# Insert data into table 
-
-
-
-add_employee = ("INSERT INTO employees "
-               "(first_name, last_name, hire_date, gender, birth_date) "
-               "VALUES (%s, %s, %s, %s, %s)")
-# Insert salary information
-data_salary = {
-  'emp_no': emp_no,
-  'salary': 50000,
-  'from_date': tomorrow,
-  'to_date': date(9999, 1, 1),
-}
-
-add_team_efg = ("INSERT INTO team_tfo_perf "
-               "(team_no, team_name, fga_e3_n, team_efg_e3, team_efg_e5, team_efg_diff) "
-               "VALUES (%(team_no)s, %(team_name)s, %(fga_e3_n)s, %(team_efg_e3)s, %(team_efg_e5)s, %(team_efg_diff)s)")
-               
-add_team_efg_auto_id = ("INSERT INTO team_tfo_perf "
-               "(team_name, fga_e3_n, team_efg_e3, team_efg_e5, team_efg_diff) "
-               "VALUES (%(team_name)s, %(fga_e3_n)s, %(team_efg_e3)s, %(team_efg_e5)s, %(team_efg_diff)s)")
-               
-               
-# Insert salary information
-data_team_perf = {
-#    'team_no': 2,
-    'team_name': 'ABC',
-    'fga_e3_n': 100,
-    'team_efg_e3': 0.40,
-    'team_efg_e5': 0.50,
-    'team_efg_diff': 0.10,
-}
-
-# Execute the INSERT
-
-cursor.execute(add_team_efg, data_team_perf)
-
-cursor.execute(add_team_efg_auto_id, data_team_perf)
-
-
-con_nba.commit()
 
 
 add_team_efg_raw = ("INSERT INTO team_tfo_perf "
@@ -358,6 +242,77 @@ add_team_efg_raw = ("INSERT INTO team_tfo_perf "
 cursor.execute(add_team_efg_raw)
        
               
+              # Set up insert statement 
+              
+add_team_perf_simple = ("INSERT INTO team_tfo_perf "
+               "(team_name, team_efg_e3, team_efg_e5, team_efg_diff) "
+               "VALUES (%s, %s, %s, %s)")
+              
+
+# Update db for efg performance for all teams
+
+# Collect data from team_table (computed table, ie pandas table)
+
+# get a cursor
+cursor = con_nba.cursor()
+
+# Go thru tables, pull needed info, and push to db
+
+# Note: here casting all as native python floats, because from Pandas/Numpy getting a diff type of float64.
+# could use a converter, but just using straight casting here.
+
+for j in arange(0,len(team_report)): 
+    tuple_in = ()
+    row = team_report.iloc[j]
+    tuple_in = ( team_report.index[j], float(row['team_efg_e3']), float(row['team_efg_e5']), float(row['team_efg_diff']))
+    print tuple_in
+    
+    # insert tuple into sql db
+    
+    # add to sql db
+    cursor.execute(add_team_perf_simple, tuple_in)
+
+
+# End loop
+
+# add timestamp to performance? like nba season/year ? 2015 ?
+
+
+
+
+# Commit 
+con_nba.commit()
+
+# and close con
+con_nba.close()
+
+# ----------------------------------------------------
+
+
+# Test insert
+
+
+
+# Test section
+
+cursor = con_nba.cursor()
+
+
+cursor.execute(add_team_perf_simple, tuple_in)
+
+con_nba.commit()
+
+# ProgrammingError: Failed processing format-parameters; Python 'float64' cannot be converted to a MySQL type 
+
+
+
+
+
+
+
+# ------------------------------
+
+
 
 
 # Add in data for Team Table
@@ -393,17 +348,140 @@ for team_data in team_name_list:
 con_nba.commit()
 
 # end
+
+        
+
+
+
+
+# ----
+
+
+# -------------------------------
+
+# scratch
+
+
+
+cursor.execute("")
+row = cursor.fetchone()
+
+# -------------------------------------
+
+# --------------------------------------
+
+TABLES = {}
+TABLES['team_tfo_perf'] = (
+    "CREATE TABLE `team_tfo_perf` ("
+    "  `team_no` int(11) NOT NULL AUTO_INCREMENT,"
+    "  `team_name` varchar(3) NOT NULL,"
+    "  `fga_e3_n` int(4) NOT NULL, "
+    "  `team_efg_e3` float(4,2), "
+    "  `team_efg_e5` float(4,2), "
+    "  `team_efg_diff` float(4,2), "
+    "  PRIMARY KEY (`team_no`), KEY `team_no` (`team_no`)"
+    ") ENGINE=InnoDB")
+
+TABLES['teams'] = (
+    "CREATE TABLE `teams` ("
+    "  `team_no` int(11) NOT NULL AUTO_INCREMENT,"
+    "  `team_name` varchar(3) NOT NULL,"
+    "  `full_name` varchar(60), "
+    "  `city` varchar(30), "
+    "  PRIMARY KEY (`team_no`), KEY `team_name` (`team_name`)"
+    ") ENGINE=InnoDB")
+
+TABLES['player_twitter_info'] = (
+    "CREATE TABLE `player_twitter_info` ("
+    "  `plyr_twit_id` int(11) NOT NULL AUTO_INCREMENT,"
+    "  `player_id` int(11),"
+    "  `first_name` varchar(40) NOT NULL,"
+    "  `last_name` varchar(50) NOT NULL,"
+    "  `twitter_handle` varchar(50) NOT NULL, "
+    "  PRIMARY KEY (`plyr_twit_id`), KEY `player_id` (`player_id`)"
+    ") ENGINE=InnoDB")
+    
+
+
+#name, ddl in TABLES.iteritems():
+#    try:
+#        print("Creating table {}: ".format(name), end='')
+#        cursor.execute(ddl)
+#    except err:
+#        print 'failed: ', err.msg
+#        
+
+
+cursor = con_nba.cursor()
+cursor.execute(TABLES['team_tfo_perf'])
+
+cursor.execute(TABLES['teams'])
+
+# Create twit info table
+cursor.execute(TABLES['player_twitter_info'])
+
+# ok - made table 
+
+
     
 # Test section
 
+cursor = con_nba.cursor()
 cursor.execute(add_team_name, team_name_data)
+
 con_nba.commit()
 
-        
-# Update db for efg performance for all teams
 
-# ... 
 
+# ----------------------------
+
+# Insert data into table 
+
+# set up some tables / one time only here tho
+
+
+add_team_efg = ("INSERT INTO team_tfo_perf "
+               "(team_no, team_name, fga_e3_n, team_efg_e3, team_efg_e5, team_efg_diff) "
+               "VALUES (%(team_no)s, %(team_name)s, %(fga_e3_n)s, %(team_efg_e3)s, %(team_efg_e5)s, %(team_efg_diff)s)")
+               
+add_team_efg_auto_id = ("INSERT INTO team_tfo_perf "
+               "(team_name, fga_e3_n, team_efg_e3, team_efg_e5, team_efg_diff) "
+               "VALUES (%(team_name)s, %(fga_e3_n)s, %(team_efg_e3)s, %(team_efg_e5)s, %(team_efg_diff)s)")
+               
+               
+# Insert salary information
+data_team_perf = {
+#    'team_no': 2,
+    'team_name': 'ABC',
+    'fga_e3_n': 100,
+    'team_efg_e3': 0.40,
+    'team_efg_e5': 0.50,
+    'team_efg_diff': 0.10,
+}
+
+# Execute the INSERT
+
+cursor.execute(add_team_efg, data_team_perf)
+
+cursor.execute(add_team_efg_auto_id, data_team_perf)
+
+
+con_nba.commit()
+
+
+
+# -------------------------------
+
+add_employee = ("INSERT INTO employees "
+               "(first_name, last_name, hire_date, gender, birth_date) "
+               "VALUES (%s, %s, %s, %s, %s)")
+# Insert salary information
+data_salary = {
+  'emp_no': emp_no,
+  'salary': 50000,
+  'from_date': tomorrow,
+  'to_date': date(9999, 1, 1),
+}
 
 
 

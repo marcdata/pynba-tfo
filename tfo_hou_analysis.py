@@ -105,5 +105,10 @@ print "\n"
 # Distance was a non-factor. Misses were actually closer than Makes.
 
 
+# subset_hou[filter_notharden & filter_3pt_attempts & (subset_hou['epoch'] == 3)]['shooter'].unique()
+
+# array(['T.Ariza', 'J.Terry', 'T.Daniels', 'F.Garcia', 'N.Johnson',
+#       'P.Beverley', 'D.Motiejunas', 'C.Brewer', 'J.Smith'], dtype=object)
+
 
 

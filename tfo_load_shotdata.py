@@ -195,12 +195,13 @@ def main():
     
         # Do work , convert string timestamps to float values
         
-        array_out = [getSec(temp) for temp in df.Time]
-        df['Time2'] = array_out
+        converted_times = [getSec(temp) for temp in df.Time]
+        df['Time2'] = converted_times
         
         #df["Time2"].hist(bins=100)
         
-        df2 = df[df["Time2"] < 180]
+        df2 = df.copy()
+        df2 = df2[df2["Time2"] < 180]
         df2 = df2[df2["Qtr"] != "4th" ]
         df2 = df2[df2["Qtr"] != "OT" ]
         df2 = df2[df2["Qtr"] != "2OT"] 
